@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: linear-gradient(to right, #e0f2fe, #f0f9ff);
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 260px;
+    background: #0ea5e9;
+    color: white;
+    padding: 20px;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background: white;
+    color: #0ea5e9;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* MAIN AREA */
+
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+.topbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.topbar input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #bae6fd;
+}
+
+.topbar button {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+/* GESTURE GRID */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 220px);
+    gap: 20px;
+}
+
+/* GESTURE CARD */
+
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(14,165,233,0.2);
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+.card h3 {
+    margin: 10px 0;
+}
+
+/* FLASH EFFECT WHEN TRIGGERED */
+
+.flash {
+    animation: pulse 0.6s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); background: #e0f2fe; }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px);}
+    to { opacity: 1; transform: translateY(0);}
+}

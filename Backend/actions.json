@@ -1,0 +1,22 @@
+{
+  "volume_up": {
+    "type": "system",
+    "label": "Volume Up",
+    "keys": ["volumeup"]
+  },
+  "volume_down": {
+    "type": "system",
+    "label": "Volume Down",
+    "keys": ["volumedown"]
+  },
+  "next_tab": {
+    "type": "system",
+    "label": "Next Tab",
+    "keys": ["ctrl", "tab"]
+  },
+  "play_pause": {
+    "type": "system",
+    "label": "Play / Pause",
+    "keys": ["playpause"]
+  }
+}

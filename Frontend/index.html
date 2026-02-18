@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gesture Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <p id="systemStatus">System: Ready</p>
+        <button onclick="trainModel()">🧠 Train Model</button>
+        <button onclick="startAI()">▶ Start AI</button>
+        <button onclick="stopAI()">⏹ Stop AI</button>
+
+    </div>
+
+    <div class="main">
+
+        <div class="topbar">
+            <input id="newGesture" placeholder="New gesture">
+            <button onclick="addGesture()">➕ Add</button>
+        </div>
+
+        <div id="gestureGrid" class="grid"></div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
