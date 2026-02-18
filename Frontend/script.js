@@ -53,7 +53,7 @@ function createCard(name, currentAction) {
     title.innerText = name;
 
     const dropdown = document.createElement("select");
-
+    
     for (const action in actionsData) {
 
         const option = document.createElement("option");
@@ -65,10 +65,14 @@ function createCard(name, currentAction) {
         dropdown.appendChild(option);
     }
 
+    // ACTIONS CONTAINER
+    const actionsDiv = document.createElement("div");
+    actionsDiv.className = "card-actions";
 
     // 📸 CAPTURE BUTTON
     const captureBtn = document.createElement("button");
     captureBtn.innerText = "📸";
+    captureBtn.title = "Capture Gesture Images";
     captureBtn.onclick = async () => {
 
         setStatus("Capturing " + name + "...");
@@ -80,6 +84,8 @@ function createCard(name, currentAction) {
     // 💾 SAVE MAPPING
     const saveBtn = document.createElement("button");
     saveBtn.innerText = "💾";
+    saveBtn.title = "Save Mapping";
+    saveBtn.className = "save-btn";
     saveBtn.onclick = async () => {
 
         await fetch(API + "/map-gesture", {
@@ -98,18 +104,23 @@ function createCard(name, currentAction) {
     // 🗑 DELETE
     const deleteBtn = document.createElement("button");
     deleteBtn.innerText = "🗑";
+    deleteBtn.title = "Delete Gesture";
+    deleteBtn.className = "delete-btn";
     deleteBtn.onclick = async () => {
+
+        if(!confirm("Are you sure you want to delete gesture '" + name + "'?")) return;
 
         await fetch(API + "/delete-gesture/" + name, { method: "POST" });
         loadGestures();
     };
 
+    actionsDiv.appendChild(captureBtn);
+    actionsDiv.appendChild(saveBtn);
+    actionsDiv.appendChild(deleteBtn);
 
     card.appendChild(title);
     card.appendChild(dropdown);
-    card.appendChild(captureBtn);
-    card.appendChild(saveBtn);
-    card.appendChild(deleteBtn);
+    card.appendChild(actionsDiv);
 
     document.getElementById("gestureGrid").appendChild(card);
 }
