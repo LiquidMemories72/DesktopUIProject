@@ -38,7 +38,14 @@
   "type": "system",
   "label": "Show Desktop",
   "keys": ["win", "d"]
+},
+"screenshot_full": {
+  "type": "system",
+  "label": "Screenshot (Full Screen)",
+  "keys": ["printscreen"]
 }
+
+
 
 
 

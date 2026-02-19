@@ -18,8 +18,9 @@ DATASET_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "dataset"))
 os.makedirs(DATASET_PATH, exist_ok=True)
 
 CAPTURE_TIME = 25
-DOT_RADIUS = 12
-MOVE_SPEED = 3   # lower = slower smoother
+BOX_SIZE = 280  # Size of the contracting/expanding box
+BOX_EXPANSION_CYCLE = 2.0  # seconds for full cycle
+MOVE_SPEED = 2  # Movement speed between positions
 
 
 base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
@@ -95,7 +96,7 @@ def capture_gesture(gesture_name):
         if remaining <= 0:
             break
 
-        # smooth dot motion
+        # Smooth box position translation between target positions
         direction = target_pos - current_pos
         distance = np.linalg.norm(direction)
 
@@ -105,7 +106,20 @@ def capture_gesture(gesture_name):
         else:
             current_pos += direction / distance * MOVE_SPEED
 
-        cx, cy = current_pos.astype(int)
+        box_center = current_pos.astype(int)
+
+        # Calculate box size based on time for pulsing effect
+        progress = (elapsed % BOX_EXPANSION_CYCLE) / BOX_EXPANSION_CYCLE
+        
+        # Expand then contract (sine wave pattern)
+        size_factor = 0.7 + 0.3 * np.sin(progress * 2 * np.pi)
+        current_box_size = int(BOX_SIZE * size_factor)
+        
+        # Draw box centered on current position
+        x1 = box_center[0] - current_box_size // 2
+        y1 = box_center[1] - current_box_size // 2
+        x2 = box_center[0] + current_box_size // 2
+        y2 = box_center[1] + current_box_size // 2
 
         # 🔥 MediaPipe on FULL frame
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -123,16 +137,16 @@ def capture_gesture(gesture_name):
                     py = int(lm.y * frame.shape[0])
                     cv2.circle(frame, (px, py), 3, (0, 255, 0), -1)
 
-        # 🎯 guiding dot
-        cv2.circle(frame, (cx, cy), DOT_RADIUS, (0, 0, 255), -1)
+        # 📦 Draw contracting/expanding box
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 255), 3)
 
         # UI text
         cv2.putText(frame, f"Time left: {remaining}s", (10, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
-        cv2.putText(frame, "Follow the dot with your hand",
+        cv2.putText(frame, "Try to keep your hand inside the box",
                     (10, 80), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.8, (255, 255, 255), 2)
+                    0.8, (0, 255, 255), 2)
 
         cv2.imshow("Capture", frame)
 
