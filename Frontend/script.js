@@ -124,6 +124,21 @@ function createCard(name, currentAction) {
 
     document.getElementById("gestureGrid").appendChild(card);
 }
+let pointerMode = false;
+
+async function togglePointer() {
+    pointerMode = !pointerMode;
+
+    await fetch(API + "/pointer-mode/" + (pointerMode ? "on" : "off"), {
+        method: "POST"
+    });
+
+    // Update button text immediately
+    const btn = document.getElementById("togglePointerBtn");
+    btn.innerText = pointerMode ? "Pointer Mode: ON" : "Pointer Mode: OFF";
+
+    loadStatus();
+}
 
 
 
@@ -173,6 +188,13 @@ async function loadStatus() {
     document.getElementById("systemStatus").innerText =
         "System: " + status.status +
         (status.last_action ? " | Last: " + status.last_action : "");
+
+    // Update pointer button
+    const btn = document.getElementById("togglePointerBtn");
+    btn.innerText = status.pointer_mode ? "Pointer Mode: ON" : "Pointer Mode: OFF";
+
+    // Sync local variable
+    pointerMode = status.pointer_mode;
 
     if (status.last_action) {
 

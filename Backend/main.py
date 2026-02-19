@@ -8,6 +8,8 @@ import glob
 import pyautogui
 import sys
 import subprocess
+pointer_mode = False
+
 def get_start_menu_apps():
 
     paths = [
@@ -83,7 +85,7 @@ def get_actions():
 
 @app.get("/status")
 def get_status():
-    return system_state
+    return {**system_state, "pointer_mode": pointer_mode}
 
 # 🟢 GET current gesture → action mapping
 @app.get("/gestures")
@@ -148,6 +150,12 @@ def add_gesture(data: GestureCreate):
 
     return {"message": f"{gesture} added"}
 import subprocess
+@app.post("/pointer-mode/{state}")
+def set_pointer_mode(state: str):
+    global pointer_mode
+
+    pointer_mode = (state == "on")
+    return {"pointer_mode": pointer_mode}
 
 
 @app.post("/capture/{gesture_name}")

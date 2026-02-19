@@ -9,18 +9,59 @@ import os
 from collections import deque
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+import pyautogui
+import ctypes
+
+user32 = ctypes.windll.user32
+def move_mouse(x, y):
+    screen_w = user32.GetSystemMetrics(0)
+    screen_h = user32.GetSystemMetrics(1)
+
+    abs_x = int(x * 65535 / screen_w)
+    abs_y = int(y * 65535 / screen_h)
+
+    ctypes.windll.user32.mouse_event(
+        0x0001 | 0x8000,  # MOVE | ABSOLUTE
+        abs_x,
+        abs_y,
+        0,
+        0
+    )
+def mouse_down():
+    ctypes.windll.user32.mouse_event(0x0002, 0, 0, 0, 0)
+
+def mouse_up():
+    ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
+pinch_active = False
+PINCH_THRESHOLD = 0.035   # tune for your camera
+POINTER_MODE = False
+LAST_MODE_CHECK = 0
+
+
 
 
 # 🔹 CONFIG
 API_URL = "http://127.0.0.1:8000/trigger/"
 CONFIDENCE_THRESHOLD = 0.9
 HOLD_TIME = 1.5  # seconds user must hold gesture
+smooth_x, smooth_y = 0, 0
+prev_x, prev_y = 0, 0
+
+SMOOTHING = 8
+MOVE_THRESHOLD = 5   # ignore micro-movements (pixels)
+
+
+
+screen_w, screen_h = pyautogui.size()
+pyautogui.FAILSAFE = False
+FRAME_MARGIN = 120 # smaller = more sensitive
 
   # seconds
 
 
 # 🔹 Load model assets
 BASE_DIR = os.path.dirname(__file__)
+
 
 model= os.path.abspath(
     os.path.join(BASE_DIR, "model", "gesture_model.h5")
@@ -50,8 +91,24 @@ gesture_start_time = None
 
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+
+
 
 while True:
+   # 🔄 Check pointer mode from backend every 0.5s
+    if time.time() - LAST_MODE_CHECK > 0.5:
+        try:
+            res = requests.get("http://127.0.0.1:8000/status").json()
+            POINTER_MODE = res.get("pointer_mode", False)
+        except:
+            pass
+        LAST_MODE_CHECK = time.time()
+
+
+
 
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
@@ -62,8 +119,70 @@ while True:
     result = landmarker.detect(mp_image)
 
     if result.hand_landmarks:
-
+         # 🖱️ INDEX FINGER TIP = landmark 8
+    
         for hand in result.hand_landmarks:
+            thumb_tip = hand[4]
+            index_tip = hand[8]
+
+            pinch_distance = np.hypot(
+                thumb_tip.x - index_tip.x,
+                thumb_tip.y - index_tip.y
+            )
+
+            # if POINTER_MODE:
+            #     if pinch_distance < PINCH_THRESHOLD and not pinch_active:
+            #         mouse_down()
+            #         pinch_active = True
+
+            #     elif pinch_distance >= PINCH_THRESHOLD and pinch_active:
+            #         mouse_up()
+            #         pinch_active = False
+            # else:
+            #     if pinch_active:
+            #         mouse_up()
+            #         pinch_active = False
+
+
+         
+
+            h, w, _ = frame.shape
+
+            raw_x = np.interp(index_tip.x * w,
+                            (FRAME_MARGIN, w - FRAME_MARGIN),
+                            (0, screen_w))
+
+            raw_y = np.interp(index_tip.y * h,
+                            (FRAME_MARGIN, h - FRAME_MARGIN),
+                            (0, screen_h))
+
+            # 🎯 distance between current smooth position and target
+            distance = np.hypot(raw_x - smooth_x, raw_y - smooth_y)
+
+            # 🧠 dynamic smoothing
+            if distance < 40:
+                smoothing = 7   # ultra stable for tiny movement
+            elif distance < 100:
+                smoothing = 5
+            else:
+                smoothing = 3   # fast for large movement
+
+            # 🧈 exponential smoothing
+            smooth_x += (raw_x - smooth_x) / smoothing
+            smooth_y += (raw_y - smooth_y) / smoothing
+
+            # 🚫 anti-jitter
+            dx = abs(smooth_x - prev_x)
+            dy = abs(smooth_y - prev_y)
+
+            if POINTER_MODE and (dx > MOVE_THRESHOLD or dy > MOVE_THRESHOLD):
+                move_mouse(smooth_x, smooth_y)
+                prev_x, prev_y = smooth_x, smooth_y
+
+
+          
+
+
 
             landmarks = []
 
@@ -72,29 +191,31 @@ while True:
 
             X = np.array(landmarks).reshape(1, -1)
             X = scaler.transform(X)
+            if not POINTER_MODE:
+                prediction = model.predict(X, verbose=0)
 
-            prediction = model.predict(X, verbose=0)
+                class_id = np.argmax(prediction)
+                confidence = np.max(prediction)
 
-            class_id = np.argmax(prediction)
-            confidence = np.max(prediction)
+                prediction_buffer.append(class_id)
 
-            prediction_buffer.append(class_id)
-
-            stable_id = max(set(prediction_buffer), key=prediction_buffer.count)
-            gesture_name = labels.inverse_transform([stable_id])[0]
-
-            # UI
-            cv2.putText(frame,
+                stable_id = max(set(prediction_buffer), key=prediction_buffer.count)
+                gesture_name = labels.inverse_transform([stable_id])[0]
+                cv2.putText(frame,
                         f"{gesture_name} ({confidence:.2f})",
                         (10, 50),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2)
 
+            # UI
+           
+
             # 🔥 HOLD-TO-CONFIRM LOGIC
 
             current_time = time.time()
 
-            if confidence > CONFIDENCE_THRESHOLD:
+            if not POINTER_MODE and confidence > CONFIDENCE_THRESHOLD:
+
 
                 if candidate_gesture != gesture_name:
                     candidate_gesture = gesture_name
@@ -133,6 +254,12 @@ while True:
                 px = int(lm.x * frame.shape[1])
                 py = int(lm.y * frame.shape[0])
                 cv2.circle(frame, (px, py), 3, (0, 255, 0), -1)
+
+    mode_text = "POINTER MODE" if POINTER_MODE else "GESTURE MODE"
+    mode_color = (255,255,0) if POINTER_MODE else (0,255,255)
+
+    cv2.putText(frame, mode_text, (10,140),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, mode_color, 2)
 
     cv2.imshow("Gesture Controller", frame)
 
