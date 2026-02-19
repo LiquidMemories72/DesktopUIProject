@@ -14,7 +14,9 @@ from mediapipe.tasks.python import vision
 # 🔹 CONFIG
 API_URL = "http://127.0.0.1:8000/trigger/"
 CONFIDENCE_THRESHOLD = 0.9
-COOLDOWN = 2  # seconds
+HOLD_TIME = 1.5  # seconds user must hold gesture
+
+  # seconds
 
 
 # 🔹 Load model assets
@@ -41,8 +43,10 @@ landmarker = vision.HandLandmarker.create_from_options(options)
 
 # 🔹 State control
 prediction_buffer = deque(maxlen=10)
-last_triggered = None
-last_trigger_time = 0
+
+candidate_gesture = None
+gesture_start_time = None
+
 
 
 cap = cv2.VideoCapture(0)
@@ -86,22 +90,43 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2)
 
-            # 🔥 TRIGGER LOGIC
+            # 🔥 HOLD-TO-CONFIRM LOGIC
+
             current_time = time.time()
 
-            if (confidence > CONFIDENCE_THRESHOLD and
-                gesture_name != last_triggered and
-                current_time - last_trigger_time > COOLDOWN):
+            if confidence > CONFIDENCE_THRESHOLD:
 
-                try:
-                    requests.post(API_URL + gesture_name)
-                    print(f"Triggered: {gesture_name}")
+                if candidate_gesture != gesture_name:
+                    candidate_gesture = gesture_name
+                    gesture_start_time = current_time
 
-                    last_triggered = gesture_name
-                    last_trigger_time = current_time
+                hold_duration = current_time - gesture_start_time
+                progress = min(hold_duration / HOLD_TIME, 1.0)
 
-                except:
-                    print("API call failed")
+                # 🟡 progress bar background
+                cv2.rectangle(frame, (10, 80), (210, 100), (255, 255, 255), 2)
+
+                # 🟢 progress fill
+                bar_width = int(progress * 200)
+                cv2.rectangle(frame, (10, 80), (10 + bar_width, 100), (0, 255, 0), -1)
+
+                cv2.putText(frame, "Hold to confirm", (10, 70),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+                if hold_duration >= HOLD_TIME:
+                    try:
+                        requests.post(API_URL + gesture_name)
+                        print("Triggered:", gesture_name)
+                    except:
+                        print("API failed")
+
+                    candidate_gesture = None
+                    gesture_start_time = None
+
+            else:
+                candidate_gesture = None
+                gesture_start_time = None
+
 
             # draw landmarks
             for lm in hand:

@@ -18,5 +18,29 @@
     "type": "system",
     "label": "Play / Pause",
     "keys": ["playpause"]
-  }
+  },
+  "close_active_window": {
+  "type": "system",
+  "label": "Close Active Window",
+  "keys": ["alt", "f4"]
+},
+"minimize_window": {
+  "type": "system",
+  "label": "Minimize Window",
+  "keys": ["win", "down"]
+},
+"alt_tab": {
+  "type": "system",
+  "label": "Switch App",
+  "keys": ["alt", "tab"]
+},
+"show_desktop": {
+  "type": "system",
+  "label": "Show Desktop",
+  "keys": ["win", "d"]
+}
+
+
+
+
 }
