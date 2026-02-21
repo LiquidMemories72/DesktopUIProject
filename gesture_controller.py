@@ -13,6 +13,14 @@ import pyautogui
 import ctypes
 
 user32 = ctypes.windll.user32
+
+# 🔗 Keep window on top using Windows API
+def set_window_on_top(window_name):
+    """Set OpenCV window to always stay on top"""
+    hwnd = user32.FindWindowW(None, window_name)
+    if hwnd:
+        # HWND_TOPMOST = -1, SWP_NOMOVE | SWP_NOSIZE = 0x0003
+        user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0003)
 def move_mouse(x, y):
     screen_w = user32.GetSystemMetrics(0)
     screen_h = user32.GetSystemMetrics(1)
@@ -262,6 +270,7 @@ while True:
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, mode_color, 2)
 
     cv2.imshow("Gesture Controller", frame)
+    set_window_on_top("Gesture Controller")
 
     if cv2.waitKey(1) & 0xFF == 27:
         break

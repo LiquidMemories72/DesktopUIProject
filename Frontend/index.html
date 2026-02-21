@@ -4,7 +4,7 @@
     <title>Gesture Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,24 +12,48 @@
 <div class="layout">
 
     <div class="sidebar">
-        <h2>Dashboard</h2>
-        <p id="systemStatus">System: Ready</p>
-        <button onclick="trainModel()">🧠 Train Model</button>
-        <button onclick="startAI()">▶ Start AI</button>
-        <button onclick="stopAI()">⏹ Stop AI</button>
-        <button id="togglePointerBtn" onclick="togglePointer()">Toggle Pointer Mode</button>
+        <div class="sidebar-header">
+            <h1>🎯 Gesture AI</h1>
+        </div>
+        
+        <div class="status-card">
+            <p id="systemStatus">System: Ready</p>
+        </div>
 
+        <div class="button-group">
+            <h3>Control</h3>
+            <button class="btn-control" onclick="startAI()">▶ Start AI</button>
+            <button class="btn-control" onclick="stopAI()">⏹ Stop AI</button>
+        </div>
+
+        <div class="button-group">
+            <h3>Training</h3>
+            <button class="btn-primary" onclick="trainModel()">🧠 Train Model</button>
+        </div>
+
+        <div class="button-group">
+            <h3>Mode</h3>
+            <button id="togglePointerBtn" class="btn-mode" onclick="togglePointer()">Pointer Mode: OFF</button>
+        </div>
     </div>
 
     <div class="main">
+        <div class="main-container">
+            <div class="header-section">
+                <h2>Gesture Collection</h2>
+                <p class="subtitle">Create and manage gesture datasets</p>
+            </div>
 
-        <div class="topbar">
-            <input id="newGesture" placeholder="New gesture">
-            <button onclick="addGesture()">➕ Add</button>
+            <div class="input-section">
+                <input id="newGesture" placeholder="Enter gesture name..." class="gesture-input">
+                <button onclick="addGesture()" class="btn-add">➕ Add Gesture</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <h3 class="gestures-title">Your Gestures</h3>
+            <div id="gestureGrid" class="grid"></div>
         </div>
-
-        <div id="gestureGrid" class="grid"></div>
-
     </div>
 
 </div>
