@@ -58,7 +58,7 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(__file__)
 
-# Load JSON files
+
 def load_json(filename):
     with open(os.path.join(BASE_DIR, filename)) as f:
         return json.load(f)
@@ -75,7 +75,7 @@ def available_apps():
     return get_start_menu_apps()
 
 
-# 🟢 GET all actions (for dropdown in UI)
+
 @app.get("/actions")
 def get_actions():
     apps = get_start_menu_apps()
@@ -87,13 +87,13 @@ def get_actions():
 def get_status():
     return {**system_state, "pointer_mode": pointer_mode}
 
-# 🟢 GET current gesture → action mapping
+
 @app.get("/gestures")
 def get_gestures():
     return gesture_map
 
 
-# Request body format
+
 class GestureMapRequest(BaseModel):
     gesture: str
     action: str
@@ -138,7 +138,7 @@ def add_gesture(data: GestureCreate):
     if gesture in gesture_map:
         return {"error": "Gesture already exists"}
 
-    # default mapping → first available action
+
     all_actions = {**actions, **get_start_menu_apps()}
     first_action = list(all_actions.keys())[0]
 
@@ -168,7 +168,7 @@ def capture_gesture(gesture_name: str):
     )
 
     subprocess.run([
-        sys.executable,   # ⭐ THIS IS THE FIX
+        sys.executable,
         script_path,
         gesture_name
     ])
@@ -214,17 +214,17 @@ def map_gesture(data: GestureMapRequest):
     gesture = data.gesture
     action = data.action
 
-    # Validate action exists
+
     all_actions = {**actions, **get_start_menu_apps()}
 
     if action not in all_actions:
         return {"error": "Invalid action"}
 
 
-    # Update in-memory dictionary
+
     gesture_map[gesture] = action
 
-    # Save to JSON file
+
     with open(os.path.join(BASE_DIR, "gesture_map.json"), "w") as f:
         json.dump(gesture_map, f, indent=4)
 
@@ -233,7 +233,7 @@ def map_gesture(data: GestureMapRequest):
     }
 
 
-# 🔴 Trigger action from gesture
+
 @app.post("/trigger/{gesture_name}")
 
 
@@ -243,13 +243,13 @@ def map_gesture(data: GestureMapRequest):
 
 def trigger_gesture(gesture_name: str):
 
-    # 1️⃣ get mapped action
+
     action_id = gesture_map.get(gesture_name)
 
     if not action_id:
         return {"error": "No action mapped"}
 
-    # 2️⃣ merge all available actions
+
     all_actions = {**actions, **get_start_menu_apps()}
 
     action = all_actions.get(action_id)
@@ -258,7 +258,7 @@ def trigger_gesture(gesture_name: str):
         return {"error": f"Action '{action_id}' not found"}
 
     try:
-        # 3️⃣ execute based on type
+
 
         if action["type"] == "app":
             os.startfile(action["path"])
@@ -266,7 +266,7 @@ def trigger_gesture(gesture_name: str):
         elif action["type"] == "system":
             pyautogui.hotkey(*action["keys"])
 
-        # 4️⃣ update system state
+
         system_state["last_action"] = f"{gesture_name} → {action['label']}"
 
         return {"message": f"{action['label']} executed"}

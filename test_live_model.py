@@ -8,7 +8,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 
-# 🔹 Load trained components
+
 model = tf.keras.models.load_model("model/gesture_model.h5")
 scaler = joblib.load("model/scaler.pkl")
 labels = joblib.load("model/labels.pkl")
@@ -62,7 +62,7 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2)
 
-            # draw landmarks
+
             for lm in hand:
                 px = int(lm.x * frame.shape[1])
                 py = int(lm.y * frame.shape[0])

@@ -14,12 +14,12 @@ import ctypes
 
 user32 = ctypes.windll.user32
 
-# 🔗 Keep window on top using Windows API
+
 def set_window_on_top(window_name):
     """Set OpenCV window to always stay on top"""
     hwnd = user32.FindWindowW(None, window_name)
     if hwnd:
-        # HWND_TOPMOST = -1, SWP_NOMOVE | SWP_NOSIZE = 0x0003
+
         user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0003)
 def move_mouse(x, y):
     screen_w = user32.GetSystemMetrics(0)
@@ -29,7 +29,7 @@ def move_mouse(x, y):
     abs_y = int(y * 65535 / screen_h)
 
     ctypes.windll.user32.mouse_event(
-        0x0001 | 0x8000,  # MOVE | ABSOLUTE
+        0x0001 | 0x8000,
         abs_x,
         abs_y,
         0,
@@ -41,33 +41,36 @@ def mouse_down():
 def mouse_up():
     ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
 pinch_active = False
-PINCH_THRESHOLD = 0.035   # tune for your camera
+PINCH_CLOSE_THRESHOLD = 0.035
+PINCH_OPEN_THRESHOLD = 0.055
+CLICK_COOLDOWN = 0.20
+last_click_time = 0
 POINTER_MODE = False
 LAST_MODE_CHECK = 0
 
 
 
 
-# 🔹 CONFIG
+
 API_URL = "http://127.0.0.1:8000/trigger/"
 CONFIDENCE_THRESHOLD = 0.9
-HOLD_TIME = 1.5  # seconds user must hold gesture
+HOLD_TIME = 1.5
 smooth_x, smooth_y = 0, 0
 prev_x, prev_y = 0, 0
 
 SMOOTHING = 8
-MOVE_THRESHOLD = 5   # ignore micro-movements (pixels)
+MOVE_THRESHOLD = 5
 
 
 
 screen_w, screen_h = pyautogui.size()
 pyautogui.FAILSAFE = False
-FRAME_MARGIN = 120 # smaller = more sensitive
-
-  # seconds
+FRAME_MARGIN = 120
 
 
-# 🔹 Load model assets
+
+
+
 BASE_DIR = os.path.dirname(__file__)
 
 
@@ -86,11 +89,11 @@ labels = joblib.load(LABELS_PATH)
 
 
 base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
-options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=1)
+options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=2)
 landmarker = vision.HandLandmarker.create_from_options(options)
 
 
-# 🔹 State control
+
 prediction_buffer = deque(maxlen=10)
 
 candidate_gesture = None
@@ -106,7 +109,7 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 
 while True:
-   # 🔄 Check pointer mode from backend every 0.5s
+
     if time.time() - LAST_MODE_CHECK > 0.5:
         try:
             res = requests.get("http://127.0.0.1:8000/status").json()
@@ -127,8 +130,8 @@ while True:
     result = landmarker.detect(mp_image)
 
     if result.hand_landmarks:
-         # 🖱️ INDEX FINGER TIP = landmark 8
-    
+
+
         for hand in result.hand_landmarks:
             thumb_tip = hand[4]
             index_tip = hand[8]
@@ -138,21 +141,21 @@ while True:
                 thumb_tip.y - index_tip.y
             )
 
-            # if POINTER_MODE:
-            #     if pinch_distance < PINCH_THRESHOLD and not pinch_active:
-            #         mouse_down()
-            #         pinch_active = True
-
-            #     elif pinch_distance >= PINCH_THRESHOLD and pinch_active:
-            #         mouse_up()
-            #         pinch_active = False
-            # else:
-            #     if pinch_active:
-            #         mouse_up()
-            #         pinch_active = False
 
 
-         
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             h, w, _ = frame.shape
 
@@ -164,22 +167,22 @@ while True:
                             (FRAME_MARGIN, h - FRAME_MARGIN),
                             (0, screen_h))
 
-            # 🎯 distance between current smooth position and target
+
             distance = np.hypot(raw_x - smooth_x, raw_y - smooth_y)
 
-            # 🧠 dynamic smoothing
+
             if distance < 40:
-                smoothing = 7   # ultra stable for tiny movement
+                smoothing = 7
             elif distance < 100:
                 smoothing = 5
             else:
-                smoothing = 3   # fast for large movement
+                smoothing = 3
 
-            # 🧈 exponential smoothing
+
             smooth_x += (raw_x - smooth_x) / smoothing
             smooth_y += (raw_y - smooth_y) / smoothing
 
-            # 🚫 anti-jitter
+
             dx = abs(smooth_x - prev_x)
             dy = abs(smooth_y - prev_y)
 
@@ -188,7 +191,7 @@ while True:
                 prev_x, prev_y = smooth_x, smooth_y
 
 
-          
+
 
 
 
@@ -215,10 +218,10 @@ while True:
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 255, 0), 2)
 
-            # UI
-           
 
-            # 🔥 HOLD-TO-CONFIRM LOGIC
+
+
+
 
             current_time = time.time()
 
@@ -232,10 +235,10 @@ while True:
                 hold_duration = current_time - gesture_start_time
                 progress = min(hold_duration / HOLD_TIME, 1.0)
 
-                # 🟡 progress bar background
+
                 cv2.rectangle(frame, (10, 80), (210, 100), (255, 255, 255), 2)
 
-                # 🟢 progress fill
+
                 bar_width = int(progress * 200)
                 cv2.rectangle(frame, (10, 80), (10 + bar_width, 100), (0, 255, 0), -1)
 
@@ -257,7 +260,7 @@ while True:
                 gesture_start_time = None
 
 
-            # draw landmarks
+
             for lm in hand:
                 px = int(lm.x * frame.shape[1])
                 py = int(lm.y * frame.shape[0])

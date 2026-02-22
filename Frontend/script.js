@@ -4,7 +4,7 @@ let actionsData = {};
 let gesturesData = {};
 
 
-// 🚀 INITIAL LOAD
+
 window.onload = async () => {
     await loadActions();
     await loadGestures();
@@ -14,18 +14,18 @@ window.onload = async () => {
 
 
 
-// =============================
-// LOAD ACTIONS FOR DROPDOWN
-// =============================
+
+
+
 async function loadActions() {
     actionsData = await fetch(API + "/actions").then(res => res.json());
 }
 
 
 
-// =============================
-// LOAD GESTURES → BUILD CARDS
-// =============================
+
+
+
 async function loadGestures() {
 
     gesturesData = await fetch(API + "/gestures").then(res => res.json());
@@ -40,9 +40,9 @@ async function loadGestures() {
 
 
 
-// =============================
-// CREATE GESTURE CARD
-// =============================
+
+
+
 function createCard(name, currentAction) {
 
     const card = document.createElement("div");
@@ -53,7 +53,7 @@ function createCard(name, currentAction) {
     title.innerText = name;
 
     const dropdown = document.createElement("select");
-    
+
     for (const action in actionsData) {
 
         const option = document.createElement("option");
@@ -65,11 +65,11 @@ function createCard(name, currentAction) {
         dropdown.appendChild(option);
     }
 
-    // ACTIONS CONTAINER
+
     const actionsDiv = document.createElement("div");
     actionsDiv.className = "card-actions";
 
-    // 📸 CAPTURE BUTTON
+
     const captureBtn = document.createElement("button");
     captureBtn.innerText = "📸";
     captureBtn.title = "Capture Gesture Images";
@@ -81,7 +81,7 @@ function createCard(name, currentAction) {
     };
 
 
-    // 💾 SAVE MAPPING
+
     const saveBtn = document.createElement("button");
     saveBtn.innerText = "💾";
     saveBtn.title = "Save Mapping";
@@ -101,7 +101,7 @@ function createCard(name, currentAction) {
     };
 
 
-    // 🗑 DELETE
+
     const deleteBtn = document.createElement("button");
     deleteBtn.innerText = "🗑";
     deleteBtn.title = "Delete Gesture";
@@ -133,7 +133,7 @@ async function togglePointer() {
         method: "POST"
     });
 
-    // Update button text immediately
+
     const btn = document.getElementById("togglePointerBtn");
     btn.innerText = pointerMode ? "Pointer Mode: ON" : "Pointer Mode: OFF";
 
@@ -142,9 +142,9 @@ async function togglePointer() {
 
 
 
-// =============================
-// ADD NEW GESTURE
-// =============================
+
+
+
 async function addGesture() {
 
     const name = document.getElementById("newGesture").value;
@@ -164,9 +164,9 @@ async function addGesture() {
 
 
 
-// =============================
-// TRAIN MODEL
-// =============================
+
+
+
 async function trainModel() {
 
     setStatus("Training model...");
@@ -178,9 +178,9 @@ async function trainModel() {
 
 
 
-// =============================
-// SYSTEM STATUS
-// =============================
+
+
+
 async function loadStatus() {
 
     const status = await fetch(API + "/status").then(res => res.json());
@@ -189,11 +189,11 @@ async function loadStatus() {
         "System: " + status.status +
         (status.last_action ? " | Last: " + status.last_action : "");
 
-    // Update pointer button
+
     const btn = document.getElementById("togglePointerBtn");
     btn.innerText = status.pointer_mode ? "Pointer Mode: ON" : "Pointer Mode: OFF";
 
-    // Sync local variable
+
     pointerMode = status.pointer_mode;
 
     if (status.last_action) {
@@ -211,9 +211,9 @@ function setStatus(msg) {
 
 
 
-// =============================
-// FLASH ANIMATION
-// =============================
+
+
+
 function flashCard(name) {
 
     const card = document.getElementById("card-" + name);
@@ -233,4 +233,3 @@ async function startAI() {
 async function stopAI() {
     await fetch(API + "/stop-detection", { method: "POST" });
 }
-

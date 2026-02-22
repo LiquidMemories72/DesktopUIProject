@@ -33,7 +33,7 @@ body {
     z-index: 1;
 }
 
-/* Background Decorations */
+
 .layout::before {
     content: '';
     position: fixed;
@@ -60,7 +60,7 @@ body {
     pointer-events: none;
 }
 
-/* SIDEBAR */
+
 .sidebar {
     width: 320px;
     background: var(--sidebar-bg);
@@ -179,7 +179,7 @@ body {
     box-shadow: 0 8px 24px rgba(147, 51, 234, 0.25);
 }
 
-/* MAIN AREA */
+
 .main {
     flex: 1;
     display: flex;
@@ -279,7 +279,7 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* GESTURE GRID */
+
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -287,7 +287,7 @@ body {
     flex: 1;
 }
 
-/* GESTURE CARD */
+
 .card {
     background: var(--card-bg);
     padding: 24px;
@@ -382,7 +382,7 @@ body {
     color: #86efac;
 }
 
-/* FLASH EFFECT */
+
 .flash {
     animation: pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -415,7 +415,7 @@ body {
     }
 }
 
-/* Scrollbar */
+
 ::-webkit-scrollbar {
     width: 8px;
 }
