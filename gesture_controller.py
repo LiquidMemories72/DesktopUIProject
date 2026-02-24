@@ -90,19 +90,10 @@ def pick_pointer_and_control_hands(result):
     control_hand = None
 
     for item in hands:
-        if item["label"] == "Right" and pointer_hand is None:
+        if item["label"] == "Right":
             pointer_hand = item["landmarks"]
-        elif item["label"] == "Left" and control_hand is None:
+        elif item["label"] == "Left":
             control_hand = item["landmarks"]
-
-    if pointer_hand is None and hands:
-        pointer_hand = hands[0]["landmarks"]
-
-    if control_hand is None and len(hands) > 1:
-        for item in hands:
-            if item["landmarks"] is not pointer_hand:
-                control_hand = item["landmarks"]
-                break
 
     return pointer_hand, control_hand, hands
 
@@ -155,30 +146,33 @@ while True:
     if result.hand_landmarks:
         pointer_hand, control_hand, hands = pick_pointer_and_control_hands(result)
 
-        if POINTER_MODE and pointer_hand is not None:
-            index_tip = pointer_hand[8]
-            h, w, _ = frame.shape
+        if POINTER_MODE:
+            # Right Hand for movement
+            if pointer_hand is not None:
+                index_tip = pointer_hand[8]
+                h, w, _ = frame.shape
 
-            raw_x = np.interp(index_tip.x * w, (FRAME_MARGIN, w - FRAME_MARGIN), (0, screen_w))
-            raw_y = np.interp(index_tip.y * h, (FRAME_MARGIN, h - FRAME_MARGIN), (0, screen_h))
+                raw_x = np.interp(index_tip.x * w, (FRAME_MARGIN, w - FRAME_MARGIN), (0, screen_w))
+                raw_y = np.interp(index_tip.y * h, (FRAME_MARGIN, h - FRAME_MARGIN), (0, screen_h))
 
-            distance = np.hypot(raw_x - smooth_x, raw_y - smooth_y)
-            if distance < 40:
-                smoothing = 7
-            elif distance < 100:
-                smoothing = 5
-            else:
-                smoothing = 3
+                distance = np.hypot(raw_x - smooth_x, raw_y - smooth_y)
+                if distance < 40:
+                    smoothing = 7
+                elif distance < 100:
+                    smoothing = 5
+                else:
+                    smoothing = 3
 
-            smooth_x += (raw_x - smooth_x) / smoothing
-            smooth_y += (raw_y - smooth_y) / smoothing
+                smooth_x += (raw_x - smooth_x) / smoothing
+                smooth_y += (raw_y - smooth_y) / smoothing
 
-            dx = abs(smooth_x - prev_x)
-            dy = abs(smooth_y - prev_y)
-            if dx > MOVE_THRESHOLD or dy > MOVE_THRESHOLD:
-                move_mouse(smooth_x, smooth_y)
-                prev_x, prev_y = smooth_x, smooth_y
+                dx = abs(smooth_x - prev_x)
+                dy = abs(smooth_y - prev_y)
+                if dx > MOVE_THRESHOLD or dy > MOVE_THRESHOLD:
+                    move_mouse(smooth_x, smooth_y)
+                    prev_x, prev_y = smooth_x, smooth_y
 
+            # Left Hand for control (click/scroll)
             if control_hand is not None:
                 control_click_pinch = pinch_distance(control_hand, 4, 8)
                 control_scroll_pinch = pinch_distance(control_hand, 4, 12)

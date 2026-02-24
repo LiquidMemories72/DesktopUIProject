@@ -20,7 +20,7 @@ MODEL_DIR = os.path.join(BASE_DIR, "model")
 
 os.makedirs(MODEL_DIR, exist_ok=True)
 
-
+#trainer
 def train():
 
     files = glob.glob(os.path.join(DATASET_PATH, "*.csv"))

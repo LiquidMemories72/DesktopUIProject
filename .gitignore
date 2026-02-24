@@ -1,5 +1,5 @@
 # ===============================
-# 🐍 Python
+#  Python
 # ===============================
 __pycache__/
 *.py[cod]
@@ -11,14 +11,14 @@ dist/
 build/
 
 # ===============================
-# 🧠 Virtual Environment
+#  Virtual Environment
 # ===============================
 .venv/
 venv/
 env/
 
 # ===============================
-# 📦 ML Models & Artifacts
+#  ML Models & Artifacts
 # ===============================
 model/
 *.h5
@@ -28,25 +28,25 @@ model/
 *.onnx
 
 # ===============================
-# 📊 Dataset (keep structure, ignore data)
+#  Dataset (keep structure, ignore data)
 # ===============================
 dataset/*
 !dataset/.gitkeep
 
 # ===============================
-# 🎥 MediaPipe / Large binaries (optional)
+#  MediaPipe / Large binaries (optional)
 # ===============================
 *.task
 *.tflite
 
 # ===============================
-# 🖥 OS files
+#  OS files
 # ===============================
 .DS_Store
 Thumbs.db
 
 # ===============================
-# 🧪 Logs & temp files
+#  Logs & temp files
 # ===============================
 *.log
 tmp/
@@ -62,3 +62,5 @@ temp/
 # 🔐 Environment variables
 # ===============================
 .env
+
+Backend/test_live_model.py

@@ -9,7 +9,7 @@ import pyautogui
 import sys
 import subprocess
 pointer_mode = False
-
+# helper fns
 def get_start_menu_apps():
 
     paths = [
@@ -65,7 +65,7 @@ def load_json(filename):
 
 actions = load_json("actions.json")
 gesture_map = load_json("gesture_map.json")
-
+#get fns
 
 @app.get("/")
 def root():
@@ -93,7 +93,7 @@ def get_gestures():
     return gesture_map
 
 
-
+#post fns
 class GestureMapRequest(BaseModel):
     gesture: str
     action: str
