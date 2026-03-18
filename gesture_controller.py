@@ -17,12 +17,12 @@ user32 = ctypes.windll.user32
 
 WINDOW_NAME = "Gesture Controller"
 
-PINCH_CLOSE_THRESHOLD = 0.035
-PINCH_OPEN_THRESHOLD = 0.055
+PINCH_CLOSE_THRESHOLD = 0.040
+PINCH_OPEN_THRESHOLD = 0.060
 CLICK_COOLDOWN = 0.20
 
-SCROLL_PINCH_CLOSE_THRESHOLD = 0.040
-SCROLL_PINCH_OPEN_THRESHOLD = 0.060
+SCROLL_PINCH_CLOSE_THRESHOLD = 0.045
+SCROLL_PINCH_OPEN_THRESHOLD = 0.065
 SCROLL_DEADZONE = 0.004
 SCROLL_GAIN = 2200
 
@@ -90,9 +90,9 @@ def pick_pointer_and_control_hands(result):
     control_hand = None
 
     for item in hands:
-        if item["label"] == "Right":
+        if item["label"] == "Left":
             pointer_hand = item["landmarks"]
-        elif item["label"] == "Left":
+        elif item["label"] == "Right":
             control_hand = item["landmarks"]
 
     return pointer_hand, control_hand, hands

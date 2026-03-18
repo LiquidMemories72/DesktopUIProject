@@ -205,6 +205,10 @@ def delete_gesture(gesture_name: str):
     with open(os.path.join(BASE_DIR, "gesture_map.json"), "w") as f:
         json.dump(gesture_map, f, indent=4)
 
+    dataset_file = os.path.abspath(os.path.join(BASE_DIR, "..", "dataset", f"{gesture_name}.csv"))
+    if os.path.exists(dataset_file):
+        os.remove(dataset_file)
+
     return {"message": f"{gesture_name} deleted"}
 
 
